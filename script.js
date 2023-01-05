@@ -1,3 +1,4 @@
+const noteContainer = document.querySelector('.wrapper');
 const addBox = document.querySelector(".add-box");
 const popupBox = document.querySelector(".popup-box");
 const popupTitle = popupBox.querySelector("header p");
@@ -5,24 +6,27 @@ const closeIcon = popupBox.querySelector("header i");
 const titleTag = popupBox.querySelector("input");
 const descTag = popupBox.querySelector("textarea");
 const addBtn = popupBox.querySelector("button");
-const noteContainer = document.querySelector('.wrapper');
-
+// console.log(noteContainer)
+// console.log({noteContainer})
+// console.log(closeIcon)
 const months = ["January", "February", "March", "April", "May", "June", "July","August", "September", "October", "November", "December"];
 
-
+//upon initialization check the locaaal storage for notes, if any, show the notes in the DOM
 getNotesFromStorage().forEach((note) =>  showNotes(note.title, note.content, note.id, note.date))
+console.log(getNotesFromStorage())
 
 //function for getting notes from the local storage
 function getNotesFromStorage(){
-    const notes = JSON.parse(localStorage.getItem('notesCollection-notes') || '[]');
+    const notes = JSON.parse(localStorage.getItem('notesCollection-notes') || []);
     return notes
 }
 
 //function for saving note to the local storage
 function saveNotesToStorage(notesToSave){
-    localStorage.setItem('notesCollection-notes', JSON.stringify(notesToSave))
+    localStorage.setItem('notesCollection-notes', JSON.stringify(notesToSave));
+    // console.log(getNotesFromStorage())
 }
-// console.log(getNotesFromStorage())
+
 
 //event listener for displaying pop up box
 addBox.addEventListener('click', () => {
@@ -64,7 +68,7 @@ addBtn.addEventListener('click', (e) => {
 //function for adding new notes
 function addNotes(title,content, date){
     const existingNotes = getNotesFromStorage();
-    console.log(existingNotes)
+    // console.log(existingNotes)
     const newNoteObject = {
         'id': Math.floor(Math.random()*1000000),        
         title: `${title}`,
@@ -74,14 +78,14 @@ function addNotes(title,content, date){
     existingNotes.push(newNoteObject);
     showNotes(newNoteObject.title, newNoteObject.content, newNoteObject.id, newNoteObject.date);    
     saveNotesToStorage(existingNotes)
+
 }
 
 //function to create note elements
-function showNotes(title,content,id, date){
-    // document.querySelectorAll(".note").forEach(li => li.remove());
-    //create an li and append it to the notes container
+function showNotes(title,content,id, date){    
     const noteEl = document.createElement('li');
     noteEl.classList.add('note');
+    noteEl.setAttribute('id', id)
     noteContainer.appendChild(noteEl);
     let filterDesc = content.replaceAll("\n", '<br/>');
     
@@ -95,7 +99,7 @@ function showNotes(title,content,id, date){
                             <div class="settings">
                                 <i onclick ="showMenu(this)" class="fa-solid fa-ellipsis"></i>
                                 <ul class="menu">
-                                    <li><i class="fa-solid fa-pen"></i>Edit</li>
+                                    <li onclick="updateNote(${id})"><i class="fa-solid fa-pen"></i>Edit</li>
                                     <li onclick="deleteNote(${id})"><i class="fa-solid fa-trash"></i>Delete</li>
                                 </ul>
                             </div>
@@ -113,16 +117,13 @@ closeIcon.addEventListener('click', () => {
 
 function deleteNote(id){   
    const confirmDel = confirm('Are you sure you want to delete this note')
+   
    if(!confirmDel) return;    
     let existingNotes = getNotesFromStorage();
-    // console.log({existingNotes})
-    let remainingNotes = existingNotes.filter((note) => note.id != id);
-    saveNotesToStorage(remainingNotes);    
-    // console.log({remainingNotes})
-    
-  
-    // noteContainer.removeChild(element);    
-    getNotesFromStorage().forEach((note) =>  createNotesEl(note.title, note.content, note.id));
+    let remainingNotes = existingNotes.filter((note) => note.id != id);    
+    saveNotesToStorage(remainingNotes); 
+    document.getElementById(id).remove();
+      
 }
 
 function showMenu(element){
@@ -131,7 +132,20 @@ function showMenu(element){
     })
     document.addEventListener('click', (e) => {
         if(e.target.tagName != 'I' || e.target != element){
-            element.parentElement.classList.remove('show')
+            element.parentElement.classList.remove('show');
         }
     })
 }
+
+// function updateNote(id){
+//     popupBox.classList.add('show');
+//     popupTitle.innerText = 'Edit Note';    
+//     addBtn.innerText = 'Edit Note';    
+
+//     let existingNotes = getNotesFromStorage();
+//     let updatedNote = existingNotes.filter((note) => note.id == id)[0];
+//     titleTag.value = updatedNote.title;
+//     descTag.textContent = updatedNote.content;
+//     console.log(updatedNote)
+//     saveNotesToStorage(existingNotes)
+// }
